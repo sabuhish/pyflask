@@ -1,0 +1,109 @@
+version: '3.7'
+
+services:
+
+  flask:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask
+    restart: always
+    environment:
+      - APP_NAME=MyFlaskApp
+    ports:
+      - "8080:80"
+
+      
+      
+  postgres:
+    container_name:  postgres-db
+    image:           postgres:9.6.6
+    volumes:
+      - ./pgdb:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - POSTGRES_USER=postgres_user
+      - POSTGRES_PASSWORD=postgres_12345
+      - POSTGRES_DB=postgres_db
+
+    ports:
+      - "5434:5432"
+    restart: on-failure
+   
+
+  rabbitmq:
+    hostname: rabbitmq
+    build:
+      context: .
+      dockerfile: rabbitmq.dockerfile
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    environment:
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+
+
+  redis:
+    image: redis:latest
+    hostname: redis
+
+    depends_on:
+     - "rabbitmq"
+     - "postgres"
+     - "flask"
+
+  celery:
+    restart: "always"
+    build:
+      context: .
+      dockerfile: celery.dockerfile
+    container_name: celery
+    command: celery  -A app.my_app:celery worker --loglevel=INFO
+    volumes:
+      - ../:/src
+    depends_on:
+     - "rabbitmq"
+     - "postgres"
+     - "flask"
+     
+  beat:
+    restart: "always"
+    build:
+      context: .
+      dockerfile: celery.dockerfile
+   
+    container_name: beat
+
+    command: celery beat --app app.my_app:celery 
+    volumes:
+      - ../:/src
+
+    depends_on:
+     - "rabbitmq"
+     - "postgres"
+     - "flask"
+     - "celery"
+
+  flower:
+    build: .
+    command: celery -A app.my_app:celery flower --loglevel=INFO
+    ports:
+      - "5556:5555"
+    depends_on:
+     - "rabbitmq"
+     - "postgres"
+     - "flask"
+     - "celery"
+ 
+
+volumes:
+  postgresql-data:
+
+
+  
