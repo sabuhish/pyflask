@@ -1,9 +1,14 @@
 
 
+## Simple containerized Flask application  ships with rabbitmq, redis, celery, postgress and flower 
 
+
+
+### Usage
+
+```python
 
 python3 -m venv .venv
-
 
 
 pip install -r requirements.txt
@@ -16,23 +21,29 @@ export FLASK_ENV=development
 
 flask run
 
+```
+### For the first migration
 
-for first migration
 
-flask db init
+```sh
+    
 
-flask db migrate
+    flask db init
 
-flask db upgrade
+    flask db migrate
+
+    flask db upgrade
 
 
 if changes made on model:
 
-flask upgrade
+    flask upgrade
+```
 
 
+### Docker commands to run app
 
-
+```bash
 docker-compose up --build -d
 
 without detach mode:
@@ -45,5 +56,6 @@ type:
 
 localhost:8080
 
+```
 
 
