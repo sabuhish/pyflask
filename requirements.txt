@@ -30,7 +30,7 @@ MarkupSafe==1.1.1
 marshmallow==2.17.0
 marshmallow-sqlalchemy==0.15.0
 mccabe==0.6.1
-numpy==1.17.4
+numpy==1.22.0
 pandas==0.25.3
 psycopg2==2.8.4
 pylint==2.4.4
